@@ -6,7 +6,7 @@ import mlflow
 import mlflow.pytorch
 import torch
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import MLFlowLogger
 from torch.utils.data import DataLoader
 
@@ -52,7 +52,7 @@ def train(config) -> None:
     val_dataset = SpeechDefectDataset(
         data_dir=data_dir / "val",
         sample_rate=config.data.sample_rate,
-         max_duration_seconds=config.data.max_duration_seconds,
+        max_duration_seconds=config.data.max_duration_seconds,
     )
 
     train_loader = DataLoader(

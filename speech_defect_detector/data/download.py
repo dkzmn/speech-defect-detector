@@ -1,21 +1,35 @@
 import logging
 import shutil
 from pathlib import Path
-from sklearn.model_selection import train_test_split
+
 import dvc.api
 from dvc.repo import Repo
-
+from sklearn.model_selection import train_test_split
 
 logger = logging.getLogger(__name__)
+
+
+class DataDirectoryNotFoundError(ValueError):
+    """Custom exception for invalid user IDs."""
+
+    def __init__(self):
+        # Format the message within the exception class definition
+        super().__init__("Source directory for good or bad samples not found.")
+
 
 def copy_files(files: list, target: Path, split_name: str):
     """Copy files to target directory."""
     for file in files:
         shutil.copy2(file, target / file.name)
-    logger.info(f"Copied {len(files)} files to {split_name}")
+    logger.info("Copied %d files to %s", len(files), split_name)
 
 
-def prepare_data(source_dir: Path, target_dir: Path, val_split: float = 0.2, random_state: int = 42,) -> None:
+def prepare_data(
+    source_dir: Path,
+    target_dir: Path,
+    val_split: float = 0.2,
+    random_state: int = 42,
+) -> None:
     """
     Splits data from 'good' and 'bad' folders into train/val folders.
 
@@ -31,24 +45,20 @@ def prepare_data(source_dir: Path, target_dir: Path, val_split: float = 0.2, ran
     good_source = source_dir / "good"
 
     if not bad_source.exists() or not good_source.exists():
-        raise ValueError(f"Source directory for good or bad samples not found.")
-    
+        raise DataDirectoryNotFoundError
+
     bad_files = list(bad_source.glob("*.wav"))
     good_files = list(good_source.glob("*.wav"))
 
-    logger.info(f"Found {len(bad_files)} bad samples and {len(good_files)} good samples")
+    logger.info("Found %d bad samples and %d good samples", len(bad_files), len(good_files))
 
-    bad_train, bad_val = train_test_split(
-        bad_files, test_size=val_split, random_state=random_state
-    )
+    bad_train, bad_val = train_test_split(bad_files, test_size=val_split, random_state=random_state)
     good_train, good_val = train_test_split(
         good_files, test_size=val_split, random_state=random_state
     )
 
-    logger.info(
-        f"Split: {len(bad_train)} bad train, {len(bad_val)} bad val, "
-        f"{len(good_train)} good train, {len(good_val)} good val"
-    )
+    logger.info("Split: %d bad train, %d bad val.", len(bad_train), len(bad_val))
+    logger.info("Split: %d good train, %d good val.", len(good_train), len(good_val))
 
     train_bad_dir = target_dir / "train" / "bad"
     train_good_dir = target_dir / "train" / "good"
@@ -63,10 +73,12 @@ def prepare_data(source_dir: Path, target_dir: Path, val_split: float = 0.2, ran
     copy_files(good_train, train_good_dir, "train/good")
     copy_files(good_val, val_good_dir, "val/good")
 
-    logger.info(f"Data preparation completed. Data saved to {target_dir}")
+    logger.info("Data preparation completed. Data saved to %s", target_dir)
 
 
-def download_data(data_dir: Path, dvc_remote: str, val_split: float = 0.2, random_state: int = 42) -> None:
+def download_data(
+    data_dir: Path, dvc_remote: str, val_split: float = 0.2, random_state: int = 42
+) -> None:
     """
     Download data using DVC and split into train/val structure.
 
@@ -76,7 +88,7 @@ def download_data(data_dir: Path, dvc_remote: str, val_split: float = 0.2, rando
         val_split: Fraction of data to use for validation
         random_state: Random state
     """
-    logger.info(f"Downloading data to {data_dir}")
+    logger.info("Downloading data to %s", data_dir)
     data_dir = Path(data_dir)
     data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -94,11 +106,11 @@ def download_data(data_dir: Path, dvc_remote: str, val_split: float = 0.2, rando
                 prepare_data(data_dir, data_dir, val_split, random_state)
                 logger.info("Data split into train/val structure completed")
             else:
-                logger.warning(f"Could not find good/bad folders in {data_dir}.")
+                logger.warning("Could not find good/bad folders in %s.", data_dir)
         else:
             logger.info("Data already split into train/val structure")
-    except Exception as e:
-        logger.error(str(e))
+    except Exception:
+        logger.exception("Error download data.")
 
 
 def get_data_path(config_path: str = "data/data.dvc") -> Path:

@@ -6,5 +6,3 @@ patience: 10
 num_workers: 4
 log_every_n_steps: 10
 checkpoint_dir: "checkpoints"
-
-

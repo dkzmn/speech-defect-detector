@@ -1,5 +1,5 @@
-import torch.nn as nn
-import torch.nn.functional as F
+import torch.nn.functional as f
+from torch import nn
 
 
 class SpeechClassifier(nn.Module):
@@ -37,10 +37,9 @@ class SpeechClassifier(nn.Module):
         Returns:
             Logits of shape (batch, num_classes)
         """
-        x = F.relu(self.fc1(x))
+        x = f.relu(self.fc1(x))
         x = self.dropout(x)
-        x = F.relu(self.fc2(x))
+        x = f.relu(self.fc2(x))
         x = self.dropout(x)
-        x = self.fc3(x)
 
-        return x
+        return self.fc3(x)

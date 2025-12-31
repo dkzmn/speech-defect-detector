@@ -1,7 +1,9 @@
 import logging
+from pathlib import Path
+
 import fire
 from hydra import compose, initialize_config_dir
-from pathlib import Path
+
 from speech_defect_detector.training.trainer import train
 
 logging.basicConfig(level=logging.INFO)

@@ -1,15 +1,12 @@
 """PyTorch Lightning module for training."""
 
 import logging
-from pathlib import Path
 
-import mlflow
 import torch
-import torch.nn.functional as F
+import torch.nn.functional as f
 from pytorch_lightning import LightningModule
-from torch import nn
 from torch.optim import Adam
-from torchmetrics import Accuracy, F1Score, AUROC
+from torchmetrics import AUROC, Accuracy, F1Score
 
 from speech_defect_detector.models.speech_classifier import SpeechClassifier
 
@@ -65,13 +62,13 @@ class SpeechDefectLightningModule(LightningModule):
         """Forward pass."""
         return self.model(x)
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch):
         """Training step."""
         audio, labels = batch
         logits = self(audio)
-        loss = F.cross_entropy(logits, labels)
+        loss = f.cross_entropy(logits, labels)
 
-        probs = F.softmax(logits, dim=1)
+        probs = f.softmax(logits, dim=1)
         preds = torch.argmax(logits, dim=1)
 
         self.train_accuracy(preds, labels)
@@ -85,13 +82,13 @@ class SpeechDefectLightningModule(LightningModule):
 
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch):
         """Validation step."""
         audio, labels = batch
         logits = self(audio)
-        loss = F.cross_entropy(logits, labels)
+        loss = f.cross_entropy(logits, labels)
 
-        probs = F.softmax(logits, dim=1)
+        probs = f.softmax(logits, dim=1)
         preds = torch.argmax(logits, dim=1)
 
         self.val_accuracy(preds, labels)
@@ -105,13 +102,13 @@ class SpeechDefectLightningModule(LightningModule):
 
         return loss
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch):
         """Test step."""
         audio, labels = batch
         logits = self(audio)
-        loss = F.cross_entropy(logits, labels)
+        loss = f.cross_entropy(logits, labels)
 
-        probs = F.softmax(logits, dim=1)
+        probs = f.softmax(logits, dim=1)
         preds = torch.argmax(logits, dim=1)
 
         # Update metrics
@@ -128,11 +125,8 @@ class SpeechDefectLightningModule(LightningModule):
 
     def configure_optimizers(self):
         """Configure optimizer."""
-        optimizer = Adam(
+        return Adam(
             self.parameters(),
             lr=self.learning_rate,
             weight_decay=self.weight_decay,
         )
-        return optimizer
-
-

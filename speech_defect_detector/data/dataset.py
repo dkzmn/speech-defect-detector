@@ -1,13 +1,13 @@
 """Dataset classes for speech defect detection."""
 
-import os
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 import librosa
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+
+SAMPLE_ELEMENTS = 4
 
 
 class SpeechDefectDataset(Dataset):
@@ -35,7 +35,7 @@ class SpeechDefectDataset(Dataset):
         self.samples = []
         self._load_samples()
 
-    def _find_split_points(self, audio: np.ndarray, window_size: int = 1024) -> List[int]:
+    def _find_split_points(self, audio: np.ndarray, window_size: int = 1024) -> list[int]:
         """
         Find points in audio with silence for splitting.
 
@@ -63,12 +63,16 @@ class SpeechDefectDataset(Dataset):
         split_points = []
 
         for i in range(1, len(energies) - 1):
-            if energies[i] < threshold and energies[i] < energies[i - 1] and energies[i] < energies[i + 1]:
+            if (
+                energies[i] < threshold
+                and energies[i] < energies[i - 1]
+                and energies[i] < energies[i + 1]
+            ):
                 split_points.append(i * window_size)
 
         return split_points
 
-    def _split_audio(self, audio: np.ndarray) -> List[Tuple[int, int]]:
+    def _split_audio(self, audio: np.ndarray) -> list[tuple[int, int]]:
         """
         Split audio into segments not longer than max_length.
 
@@ -155,7 +159,7 @@ class SpeechDefectDataset(Dataset):
             Tuple of (audio_tensor, label)
         """
         sample_info = self.samples[idx]
-        if len(sample_info) == 4:
+        if len(sample_info) == SAMPLE_ELEMENTS:
             audio_path, label, start, end = sample_info
         else:
             audio_path, label = sample_info
