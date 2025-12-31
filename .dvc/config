@@ -1,0 +1,4 @@
+[core]
+    remote = yandex
+['remote "yandex"']
+    url = https://speech-defect-detector-data/dvc

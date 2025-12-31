@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+  - model: model
+  - data: data
+  - training: training
+  - logging: logging
+
+seed: 42
+
+

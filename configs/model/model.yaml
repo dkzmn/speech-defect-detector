@@ -1,0 +1,5 @@
+input_length: 80000
+num_classes: 2
+hidden_dim: 512
+
+

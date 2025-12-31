@@ -1,0 +1,4 @@
+data_dir: "data/raw"
+dvc_remote: "yandex"
+sample_rate: 16000
+max_duration_seconds: 5.0
